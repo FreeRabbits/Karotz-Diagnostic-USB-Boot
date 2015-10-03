@@ -9,7 +9,7 @@ This project contains files to boot your Karotz from USB and collect general- an
 
 
 Note:
-i found out that the sound does not work when the rabbit is resetted to factory defaults.
+I found out that the sound does not work when the rabbit is resetted to factory defaults.
 If you don't hear anything: please wait for the lights to stop changing (wait a few minutes).
 
 
