@@ -1,0 +1,1 @@
+This folder will collect the logfiles of your Karotz.

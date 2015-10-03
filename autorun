@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Starting Autorun Diagnostics
+
+/mnt/usbkey/autorundiag
+
+# Exit
+exit 1

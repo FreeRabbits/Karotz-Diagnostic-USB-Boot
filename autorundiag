@@ -1,0 +1,124 @@
+#! /usr/bin/python
+
+import sys
+sys.path.append("/karotz/scripts")
+sys.path.append("/usr/scripts")
+
+import os
+import time
+import config
+import network
+
+# Define global variabeles
+logfolder = "/mnt/usbkey/logs/"
+
+# Define list of LED colors
+BLACK = "000000"
+BLUE = "0000FF"
+CYAN = "00FF9F"
+GREEN = "00FF00"
+ORANGE = "FFA500"
+PINK = "FFCFAF"
+PURPLE = "9F00FF"
+RED = "FF0000"
+VIOLET = "660099"
+WHITE = "4FFF68"
+YELLOW = "75FF00"
+
+# FUNCTIONS
+
+# PLAY will play an MP3 file on the USB key
+def PLAY(mp3file):
+  os.system("killall madplay")
+  cmd = "/tmp/madplay /mnt/usbkey/sound/" + mp3file + ".mp3"
+  os.system(cmd)
+
+# LEDPULSE will change the color of the pulsing led
+def LEDPULSE(ledcolor):
+  os.system("killall led")
+  cmd = "/karotz/bin/led -l " + ledcolor + " -p 000000 -d 700 &"
+  os.system(cmd)
+  time.sleep(1)
+
+# LEDSTATIC will change the color of the static led
+def LEDSTATIC(ledcolor):
+  os.system("killall led")
+  cmd = "/karotz/bin/led -l " + ledcolor + " &"
+  os.system(cmd)
+  time.sleep(1)
+
+# Install tools (untar tools2.tar to tmp) so we can use /tmp/ to execute a command
+def INSTALLTOOLS():
+  os.system("tar -xvf /mnt/usbkey/tools/tools2.tar -C /tmp/")
+  time.sleep(1)
+
+# Copy scripts
+def COPYSCRIPTS():
+  cmd = "cp -r /usr/scripts/* /mnt/usbkey/scripts"
+  os.system(cmd)
+  time.sleep(1)   
+  
+# Get information and write to a logfile  
+def GETINFO(logname, cmdin, logfolder):
+  cmd = cmdin + " > " + logfolder + logname + ".txt"
+  print "CMD: " + cmd
+  os.system(cmd)
+  time.sleep(1) 
+
+# Get WIFI information and write to a logfile  
+def GETWIFIINFO(logname, logfolder):
+  print "Getting WIFI information"
+  network.lo_up()
+  network.eth0_up() 
+  network.wlan0_up()
+  cmd = "iwlist wlan0 scan > " + logfolder + logname + ".txt"  
+  os.system(cmd)
+  time.sleep(1)
+
+def DOEXIT():
+  os.system("umount -l /mnt/usbkey")  
+  time.sleep(1)
+
+# END OF FUNCTIONS
+  
+# turn led to orange
+LEDPULSE(ORANGE)
+
+# install tools
+INSTALLTOOLS()
+
+# play a sound
+PLAY("start")
+
+# copy scripts
+COPYSCRIPTS()
+
+# get fingerprint information
+PLAY("lookingforinfo")
+LEDSTATIC(PURPLE)
+GETINFO("dmesg", "dmesg", logfolder)
+LEDSTATIC(CYAN)
+GETINFO("ls", "ls -lR", logfolder)
+LEDSTATIC(PINK)
+GETINFO("busybox", "busybox", logfolder)
+LEDSTATIC(GREEN)
+GETINFO("ifconfig", "ifconfig -a", logfolder)
+LEDSTATIC(YELLOW)
+GETINFO("printenv", "printenv", logfolder)
+LEDSTATIC(ORANGE)
+GETINFO("ps", "ps", logfolder)
+
+# get WIFI information
+LEDSTATIC(VIOLET)
+PLAY("lookingforwifi")
+GETWIFIINFO("wifiscan", logfolder)
+
+# turn led to orange
+LEDPULSE(ORANGE)
+  
+# play a sound
+PLAY("end")
+
+# unmount and exit stuff here...
+DOEXIT()
+print "Done..."
